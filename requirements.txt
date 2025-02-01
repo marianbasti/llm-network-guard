@@ -1,0 +1,6 @@
+python-nmap==0.7.1
+openai
+jsonschema==4.17.3
+netifaces
+psutil
+python-dotenv>=0.19.0
