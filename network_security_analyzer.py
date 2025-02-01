@@ -50,184 +50,10 @@ def check_environment():
     
     return required_vars
 
-# Define the response schema
-SECURITY_REPORT_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "summary": {"type": "string"},
-        "risk_level": {"type": "string", "enum": ["LOW", "MEDIUM", "HIGH", "CRITICAL"]},
-        "findings": {
-            "type": "array",
-            "items": {
-                "type": "object",
-                "properties": {
-                    "vulnerability": {"type": "string"},
-                    "severity": {"type": "string", "enum": ["LOW", "MEDIUM", "HIGH", "CRITICAL"]},
-                    "description": {"type": "string"},
-                    "recommendation": {"type": "string"}
-                },
-                "required": ["vulnerability", "severity", "description", "recommendation"]
-            }
-        }
-    },
-    "required": ["summary", "risk_level", "findings"]
-}
-
-# Add new constants after SECURITY_REPORT_SCHEMA
-REPORT_TEMPLATES = {
-    "html": """
-    <!DOCTYPE html>
-    <html>
-    <head><title>Network Security Analysis Report</title></head>
-    <body>
-        <h1>Network Security Analysis Report</h1>
-        <h2>Executive Summary</h2>
-        {{summary}}
-        <h2>Network Scan Results</h2>
-        {{scan_results}}
-        <h2>Log Analysis</h2>
-        {{log_analysis}}
-        <h2>Recommendations</h2>
-        {{recommendations}}
-    </body>
-    </html>
-    """,
-    "markdown": """
-    # Network Security Analysis Report
-    
-    ## Executive Summary
-    {{summary}}
-    
-    ## Network Scan Results
-    {{scan_results}}
-    
-    ## Log Analysis
-    {{log_analysis}}
-    
-    ## Recommendations
-    {{recommendations}}
-    """
-}
-
-SYSTEM_PROMPTS = {
-    "security_analyst": """You are an expert security analyst with deep knowledge of network security, 
-threat detection, and vulnerability assessment. Your task is to analyze network data and provide 
-professional, detailed security assessments. Focus on:
-- Identifying security vulnerabilities and threats
-- Assessing risk levels based on industry standards
-- Providing actionable recommendations
-- Using precise technical terminology
-Your analysis should be thorough, precise, and follow security best practices.""",
-    
-    "log_analyzer": """You are an expert system log analyzer specializing in security log analysis. 
-Your expertise includes:
-- Pattern recognition in system logs
-- Identification of security incidents
-- Detection of anomalies and suspicious behavior
-- Understanding of common attack patterns
-Analyze logs thoroughly and report findings with high precision and technical accuracy.""",
-    
-    "report_writer": """You are a professional technical report writer specializing in security documentation.
-Your role is to:
-- Create clear, concise executive summaries
-- Present technical findings in an organized manner
-- Prioritize and clearly communicate security recommendations
-- Maintain professional tone and terminology
-Focus on clarity, accuracy, and actionability in your reports."""
-}
-
-LOG_ANALYSIS_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "status": {
-            "type": "string",
-            "enum": ["secure", "suspicious", "critical", "error", "no_logs"]
-        },
-        "summary": {
-            "type": "string",
-            "description": "Overall assessment of log analysis"
-        },
-        "suspicious_events": {
-            "type": "array",
-            "items": {
-                "type": "object",
-                "properties": {
-                    "timestamp": {"type": "string"},
-                    "source": {"type": "string"},
-                    "event_type": {
-                        "type": "string",
-                        "enum": [
-                            "authentication_failure",
-                            "brute_force_attempt",
-                            "suspicious_connection",
-                            "privilege_escalation",
-                            "malware_activity",
-                            "system_modification",
-                            "other"
-                        ]
-                    },
-                    "severity": {
-                        "type": "string",
-                        "enum": ["LOW", "MEDIUM", "HIGH", "CRITICAL"]
-                    },
-                    "description": {"type": "string"},
-                    "source_log": {"type": "string"},
-                    "evidence": {"type": "string"},
-                    "recommended_action": {"type": "string"}
-                },
-                "required": [
-                    "timestamp",
-                    "event_type",
-                    "severity",
-                    "description",
-                    "source_log",
-                    "recommended_action"
-                ]
-            }
-        },
-        "metrics": {
-            "type": "object",
-            "properties": {
-                "total_events_analyzed": {"type": "integer"},
-                "suspicious_event_count": {"type": "integer"},
-                "analysis_period": {
-                    "type": "object",
-                    "properties": {
-                        "start": {"type": "string"},
-                        "end": {"type": "string"}
-                    }
-                }
-            }
-        },
-        "recommendations": {
-            "type": "array",
-            "items": {
-                "type": "object",
-                "properties": {
-                    "priority": {"type": "integer", "minimum": 1, "maximum": 5},
-                    "category": {
-                        "type": "string",
-                        "enum": [
-                            "system_hardening",
-                            "monitoring",
-                            "authentication",
-                            "network_security",
-                            "incident_response",
-                            "other"
-                        ]
-                    },
-                    "description": {"type": "string"},
-                    "action_items": {
-                        "type": "array",
-                        "items": {"type": "string"}
-                    }
-                },
-                "required": ["priority", "category", "description", "action_items"]
-            }
-        }
-    },
-    "required": ["status", "summary", "suspicious_events", "metrics", "recommendations"]
-}
+# Import constants from external modules
+from schemas.schemas import SECURITY_REPORT_SCHEMA, LOG_ANALYSIS_SCHEMA
+from prompts.prompts import SYSTEM_PROMPTS, ANALYSIS_PROMPTS
+from templates.report_templates import REPORT_TEMPLATES
 
 class NetworkSecurityAnalyzer:
     def __init__(self, openai_key: str, openai_base_url: str = None):
@@ -437,23 +263,12 @@ class NetworkSecurityAnalyzer:
         logger.info(f"Analyzing results for host: {scan_results['ip']}")
         self._log_memory_usage()
         
-        prompt = f"""Given these network scan results, provide a comprehensive security assessment.
-Focus areas:
-1. Vulnerability identification in open ports and services
-2. Configuration issues and misconfigurations
-3. Potential security risks and exposure levels
-4. Compliance concerns with security standards
-
-Context:
-Host IP: {scan_results['ip']}
-Total Ports Scanned: {len(scan_results['ports'])}
-OS Detection: {scan_results['os_detection']}
-
-Scan Results:
-{json.dumps(scan_results, indent=2)}
-
-Provide detailed security findings and recommendations based on the scan results.
-"""
+        prompt = ANALYSIS_PROMPTS["network_scan"].format(
+            ip=scan_results['ip'],
+            port_count=len(scan_results['ports']),
+            os_detection=scan_results['os_detection'],
+            scan_results=json.dumps(scan_results, indent=2)
+        )
 
         response = self.client.chat.completions.create(
             model="gpt-4",
@@ -561,24 +376,11 @@ Provide detailed security findings and recommendations based on the scan results
                 "recommendations": []
             }
         
-        prompt = f"""
-        Analyze these network and system logs for security concerns.
-        Provide a detailed analysis following this structure:
-        1. Overall status of system security based on logs
-        2. List all suspicious events with timestamps and severity
-        3. Provide specific evidence for each finding
-        4. Include actionable recommendations
-        
-        Log Data to analyze:
-        {json.dumps(log_data, indent=2)}
-        
-        Analysis period:
-        Start: {start_time}
-        End: {end_time}
-        
-        Provide the analysis in a structured JSON format matching the specified schema.
-        Focus on accuracy and actionable insights.
-        """
+        prompt = ANALYSIS_PROMPTS["log_analysis"].format(
+            log_data=json.dumps(log_data, indent=2),
+            start_time=start_time,
+            end_time=end_time
+        )
         
         response = self.client.chat.completions.create(
             model="gpt-4",
@@ -617,13 +419,10 @@ Provide detailed security findings and recommendations based on the scan results
         logger.info(f"Generating {format} report")
         
         # Prepare data for the report
-        summary_prompt = f"""
-        Create an executive summary based on these scan results and log analysis:
-        Scan Results: {json.dumps(scan_results, indent=2)}
-        Log Analysis: {json.dumps(log_analysis, indent=2)}
-        
-        Focus on key findings and overall security posture.
-        """
+        summary_prompt = ANALYSIS_PROMPTS["report_summary"].format(
+            scan_results=json.dumps(scan_results, indent=2),
+            log_analysis=json.dumps(log_analysis, indent=2)
+        )
         
         summary_response = self.client.chat.completions.create(
             model="gpt-4",
@@ -633,11 +432,10 @@ Provide detailed security findings and recommendations based on the scan results
             ]
         )
         
-        recommendations_prompt = f"""
-        Based on the scan results and log analysis, provide prioritized security recommendations:
-        Scan Results: {json.dumps(scan_results, indent=2)}
-        Log Analysis: {json.dumps(log_analysis, indent=2)}
-        """
+        recommendations_prompt = ANALYSIS_PROMPTS["report_recommendations"].format(
+            scan_results=json.dumps(scan_results, indent=2),
+            log_analysis=json.dumps(log_analysis, indent=2)
+        )
         
         recommendations_response = self.client.chat.completions.create(
             model="gpt-4",
