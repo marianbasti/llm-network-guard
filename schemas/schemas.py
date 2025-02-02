@@ -11,7 +11,21 @@ SECURITY_REPORT_SCHEMA = {
                     "vulnerability": {"type": "string"},
                     "severity": {"type": "string", "enum": ["LOW", "MEDIUM", "HIGH", "CRITICAL"]},
                     "description": {"type": "string"},
-                    "recommendation": {"type": "string"}
+                    "known_exploits": {"type": "string"},
+                    "recommendation": {"type": "string"},
+                    "impact": {
+                        "type": "object",
+                        "properties": {
+                            "business": {"type": "string", "enum": ["LOW", "MEDIUM", "HIGH", "CRITICAL"]},
+                            "technical": {"type": "string", "enum": ["LOW", "MEDIUM", "HIGH", "CRITICAL"]},
+                            "data": {"type": "string", "enum": ["LOW", "MEDIUM", "HIGH", "CRITICAL"]}
+                        }
+                    },
+                    "cvss_score": {"type": "number", "minimum": 0, "maximum": 10},
+                    "threat_category": {
+                        "type": "string",
+                        "enum": ["APT", "Ransomware", "Data Exfiltration", "Insider Threat", "Zero-day", "Other"]
+                    }
                 },
                 "required": ["vulnerability", "severity", "description", "recommendation"]
             }
@@ -107,6 +121,24 @@ LOG_ANALYSIS_SCHEMA = {
                     }
                 },
                 "required": ["priority", "category", "description", "action_items"]
+            }
+        },
+        "correlation_analysis": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "pattern_id": {"type": "string"},
+                    "related_events": {
+                        "type": "array",
+                        "items": {"type": "string"}
+                    },
+                    "confidence_score": {"type": "number", "minimum": 0, "maximum": 1},
+                    "attack_chain_phase": {
+                        "type": "string",
+                        "enum": ["reconnaissance", "weaponization", "delivery", "exploitation", "installation", "command_and_control", "actions"]
+                    }
+                }
             }
         }
     },

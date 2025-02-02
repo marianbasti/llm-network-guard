@@ -1,12 +1,13 @@
 SYSTEM_PROMPTS = {
     "security_analyst": """You are an expert security analyst with deep knowledge of network security, 
-threat detection, and vulnerability assessment. Your task is to analyze network data and provide 
-professional, detailed security assessments. Focus on:
-- Identifying security vulnerabilities and threats
-- Assessing risk levels based on industry standards
-- Providing actionable recommendations
-- Using precise technical terminology
-Your analysis should be thorough, precise, and follow security best practices.""",
+threat detection, and vulnerability assessment. Your analysis should:
+- Correlate multiple data sources to identify attack patterns
+- Use the MITRE ATT&CK framework for threat classification
+- Consider business context and impact
+- Calculate CVSS scores for vulnerabilities
+- Map findings to known threat actor TTPs
+- Provide risk-based prioritization of findings
+Your analysis must be evidence-based and include confidence levels for each finding.""",
     
     "log_analyzer": """You are an expert system log analyzer specializing in security log analysis. 
 Your expertise includes:
@@ -27,40 +28,42 @@ Focus on clarity, accuracy, and actionability in your reports."""
 
 # Add new dictionary for specific analysis prompts
 ANALYSIS_PROMPTS = {
-    "network_scan": """Given these network scan results, provide a comprehensive security assessment.
+    "network_scan": """Analyze these network scan results in the context of the entire environment.
 Focus areas:
-1. Vulnerability identification in open ports and services
-2. Configuration issues and misconfigurations
-3. Potential security risks and exposure levels
-4. Compliance concerns with security standards
+1. Correlation with known threat actor TTPs
+2. Analysis of potential attack paths
+3. Asset criticality and business impact
+4. Historical context and trend analysis
+5. Regulatory compliance implications
 
-Context:
-Host IP: {ip}
-Total Ports Scanned: {port_count}
-OS Detection: {os_detection}
+Environmental Context:
+Industry: {industry}
+Critical Assets: {critical_assets}
+Threat Landscape: {threat_landscape}
+Previous Incidents: {previous_incidents}
 
 Scan Results:
 {scan_results}
 
-Provide detailed security findings and recommendations based on the scan results.""",
+Provide a comprehensive analysis that includes attack path mapping and business impact assessment.""",
 
     "log_analysis": """
-        Analyze these network and system logs for security concerns.
-        Provide a detailed analysis following this structure:
-        1. Overall status of system security based on logs
-        2. List all suspicious events with timestamps and severity
-        3. Provide specific evidence for each finding
-        4. Include actionable recommendations
-        
-        Log Data to analyze:
-        {log_data}
-        
-        Analysis period:
-        Start: {start_time}
-        End: {end_time}
-        
-        Provide the analysis in a structured JSON format matching the specified schema.
-        Focus on accuracy and actionable insights.""",
+    Analyze these logs using advanced correlation techniques:
+    1. Identify multi-stage attack patterns
+    2. Map events to MITRE ATT&CK tactics
+    3. Calculate anomaly scores for unusual patterns
+    4. Correlate events across different systems
+    5. Assess potential false positives
+    
+    Environmental Context:
+    Baseline Behavior: {baseline}
+    Known Issues: {known_issues}
+    Recent Changes: {recent_changes}
+    
+    Log Data: {log_data}
+    Time Range: {time_range}
+    
+    Provide analysis with confidence scores and supporting evidence.""",
 
     "report_summary": """
         Create an executive summary based on these scan results and log analysis:
