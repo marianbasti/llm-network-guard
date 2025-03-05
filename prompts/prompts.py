@@ -1,13 +1,11 @@
 SYSTEM_PROMPTS = {
     "security_analyst": """You are an expert security analyst with deep knowledge of network security, 
 threat detection, and vulnerability assessment. Your analysis should:
-- Correlate multiple data sources to identify attack patterns
-- Use the MITRE ATT&CK framework for threat classification
-- Consider business context and impact
-- Calculate CVSS scores for vulnerabilities
-- Map findings to known threat actor TTPs
-- Provide risk-based prioritization of findings
-Your analysis must be evidence-based and include confidence levels for each finding.""",
+- Use provided context to customize analysis depth and focus
+- Apply industry-specific threat models and compliance requirements
+- Consider business impact based on asset classification
+- Validate findings against historical patterns
+Your analysis must be context-aware and evidence-based.""",
     
     "log_analyzer": """You are an expert system log analyzer specializing in security log analysis. 
 Your expertise includes:
@@ -41,6 +39,11 @@ Industry: {industry}
 Critical Assets: {critical_assets}
 Threat Landscape: {threat_landscape}
 Previous Incidents: {previous_incidents}
+
+Host Information:
+IP: {ip}
+OS Detection: {os_detection}
+Port Count: {port_count}
 
 Scan Results:
 {scan_results}
@@ -76,4 +79,18 @@ Provide a comprehensive analysis that includes attack path mapping and business 
         Based on the scan results and log analysis, provide prioritized security recommendations:
         Scan Results: {scan_results}
         Log Analysis: {log_analysis}"""
+}
+
+ANALYSIS_PIPELINE_PROMPTS = {
+    "context_analysis": """Analyze the environment context and establish baseline expectations:
+Environmental Data:
+{env_data}
+
+Historical Context:
+{historical_data}
+
+Custom Rules:
+{custom_rules}
+
+Provide context-specific analysis parameters and baseline metrics."""
 }

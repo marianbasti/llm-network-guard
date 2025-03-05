@@ -16,7 +16,7 @@ An AI-powered network security analysis tool that combines Nmap scanning with LL
 - Python 3.8+
 - Sudo/Administrator privileges
 - Nmap installed
-- OpenAI API key
+- OpenAI (or compatible) API LLM endpoint
 - `.env` file with credentials (template provided)
 
 ## Installation

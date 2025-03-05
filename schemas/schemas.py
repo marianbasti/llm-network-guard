@@ -144,3 +144,38 @@ LOG_ANALYSIS_SCHEMA = {
     },
     "required": ["status", "summary", "suspicious_events", "metrics", "recommendations"]
 }
+
+ANALYSIS_CONTEXT_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "environment": {
+            "type": "object",
+            "properties": {
+                "industry": {"type": "string"},
+                "business_criticality": {"type": "string", "enum": ["LOW", "MEDIUM", "HIGH"]},
+                "compliance_requirements": {"type": "array", "items": {"type": "string"}},
+                "asset_classification": {"type": "string"},
+                "threat_profile": {"type": "string"}
+            }
+        },
+        "historical_data": {
+            "type": "object",
+            "properties": {
+                "previous_incidents": {"type": "array", "items": {"type": "string"}},
+                "known_vulnerabilities": {"type": "array", "items": {"type": "string"}},
+                "baseline_metrics": {"type": "object"}
+            }
+        },
+        "custom_rules": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "rule_type": {"type": "string"},
+                    "criteria": {"type": "object"},
+                    "priority": {"type": "integer", "minimum": 1, "maximum": 5}
+                }
+            }
+        }
+    }
+}
